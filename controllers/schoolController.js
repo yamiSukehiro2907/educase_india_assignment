@@ -32,12 +32,13 @@ const getSchools = asyncHandler(async (req, res) => {
   try {
     const [schools] = await pool.query("Select * from schools");
     const schoolsWithDistance = schools.map((school) => {
-      const distance = findDistance(
-        parseFloat(latitude),
-        parseFloat(longitude),
-        school.latitude,
-        school.longitude
-      ) + " km";
+      const distance =
+        findDistance(
+          parseFloat(latitude),
+          parseFloat(longitude),
+          school.latitude,
+          school.longitude
+        ) + " km";
       return { ...school, distance };
     });
     schoolsWithDistance.sort((a, b) => a.distance - b.distance);
@@ -49,24 +50,26 @@ const getSchools = asyncHandler(async (req, res) => {
 });
 
 const addSchool = asyncHandler(async (req, res) => {
-  const { name, address, latitude, longitude } = req.body;
+  const body = JSON.parse(req.body);
+  const { name, address, latitude, longitude } = body;
+
   if (!name || !address || !latitude || !longitude) {
-    res.status(400).send("All fields are required");
+    return res.status(400).send("All fields are required");
   }
 
   try {
-    const [school] = await pool.query(
-      "Insert into schools (name , address , latitude , longitude) values (? , ? , ? , ?)",
+    const [result] = await pool.query(
+      "Insert into schools (name, address, latitude, longitude) values (?, ?, ?, ?)",
       [name, address, latitude, longitude]
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "School added successfully",
-      schoolId: school.insertId,
+      schoolId: result.insertId,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error adding school");
+    return res.status(500).send("Error adding school");
   }
 });
 
