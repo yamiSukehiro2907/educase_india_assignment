@@ -25,4 +25,4 @@ async function startServer() {
 
 startServer();
 
-// app.use("/", require("./routes/schoolRoute"));
+ app.use("/", require("./routes/schoolRoute"));
